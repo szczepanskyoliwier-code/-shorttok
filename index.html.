@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShortTok</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #000;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+#app {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+.video {
+    height: 100vh;
+    position: relative;
+    scroll-snap-align: start;
+    background: #111;
+}
+
+.video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        transparent 55%,
+        rgba(0,0,0,.85)
+    );
+    pointer-events: none;
+}
+
+.info {
+    position: absolute;
+    left: 15px;
+    bottom: 90px;
+    right: 90px;
+}
+
+.username {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.music {
+    font-size: 13px;
+}
+
+.actions {
+    position: absolute;
+    right: 12px;
+    bottom: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.action {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.action span {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 3px;
+}
+
+.liked span {
+    color: #fe2c55;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#fe2c55,#25f4ee);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 20px;
+    border: 2px solid white;
+}
+
+.nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background: rgba(0,0,0,.9);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 20;
+}
+
+.nav button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 12px;
+}
+
+.nav button div {
+    font-size: 23px;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.box {
+    width: 90%;
+    max-width: 380px;
+    background: #181818;
+    padding: 25px;
+    border-radius: 15px;
+}
+
+.box h2 {
+    margin-bottom: 20px;
+}
+
+.box input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 12px;
+    border: none;
+    border-radius: 7px;
+    background: #292929;
+    color: white;
+}
+
+.box button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 7px;
+    background: #fe2c55;
+    color: white;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.close {
+    background: #333 !important;
+}
+
+.profile {
+    position: fixed;
+    inset: 0;
+    background: #111;
+    z-index: 50;
+    display: none;
+    padding: 30px 20px;
+}
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#fe2c55,#25f4ee);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+    font-weight: bold;
+    margin: 20px auto;
+}
+
+.profile h2 {
+    text-align: center;
+}
+
+.profile p {
+    text-align: center;
+    margin: 10px;
+    color: #aaa;
+}
+
+.profile button {
+    display: block;
+    margin: 20px auto;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background: #fe2c55;
+    color: white;
+}
+
+.comment-box {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #181818;
+    padding: 20px;
+    z-index: 80;
+    display: none;
+}
+
+.comment-box input {
+    width: 80%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+}
+
+.comment-box button {
+    width: 18%;
+    padding: 12px;
+    background: #fe2c55;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+    <section class="video">
+
+        <video src="https://cdn.coverr.co/videos/coverr-a-man-playing-a-video-game-1578/1080p.mp4"
+               autoplay muted loop playsinline></video>
+
+        <div class="overlay"></div>
+
+        <div class="info">
+            <div class="username">@oliwierekk</div>
+            <div class="description">
+                🎮 Minecraft edit 🔥
+            </div>
+            <div class="music">
+                🎵 Original sound
+            </div>
+        </div>
+
+        <div class="actions">
+
+            <button class="action">
+                <div class="avatar">O</div>
+            </button>
+
+            <button class="action" onclick="like(this)">
+                <span>♥</span>
+                1.2K
+            </button>
+
+            <button class="action" onclick="comments()">
+                <span>💬</span>
+                126
+            </button>
+
+            <button class="action" onclick="save(this)">
+                <span>🔖</span>
+                Zapisz
+            </button>
+
+            <button class="action" onclick="share()">
+                <span>↗</span>
+                Udostępnij
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <section class="video">
+
+        <video src="https://cdn.coverr.co/videos/coverr-girl-playing-a-video-game-1579/1080p.mp4"
+               autoplay muted loop playsinline></video>
+
+        <div class="overlay"></div>
+
+        <div class="info">
+            <div class="username">@gaming_world</div>
+            <div class="description">
+                😂 Kiedy grasz całą noc
+            </div>
+            <div class="music">
+                🎵 Gaming sound
+            </div>
+        </div>
+
+        <div class="actions">
+
+            <button class="action">
+                <div class="avatar">G</div>
+            </button>
+
+            <button class="action" onclick="like(this)">
+                <span>♥</span>
+                8.7K
+            </button>
+
+            <button class="action" onclick="comments()">
+                <span>💬</span>
+                542
+            </button>
+
+            <button class="action" onclick="save(this)">
+                <span>🔖</span>
+                Zapisz
+            </button>
+
+            <button class="action" onclick="share()">
+                <span>↗</span>
+                Udostępnij
+            </button>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<nav class="nav">
+
+    <button onclick="closeProfile()">
+        <div>⌂</div>
+        Główna
+    </button>
+
+    <button>
+        <div>🔎</div>
+        Odkrywaj
+    </button>
+
+    <button onclick="login()">
+        <div>＋</div>
+        Dodaj
+    </button>
+
+    <button>
+        <div>💬</div>
+        Wiadomości
+    </button>
+
+    <button onclick="profile()">
+        <div>👤</div>
+        Profil
+    </button>
+
+</nav>
+
+
+<div class="modal" id="loginModal">
+
+    <div class="box">
+
+        <h2>Logowanie</h2>
+
+        <input id="usernameInput"
+               placeholder="Nazwa użytkownika">
+
+        <input id="passwordInput"
+               type="password"
+               placeholder="Hasło">
+
+        <button onclick="doLogin()">
+            Zaloguj się
+        </button>
+
+        <button onclick="register()">
+            Załóż konto
+        </button>
+
+        <button class="close" onclick="closeLogin()">
+            Zamknij
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="profile" id="profile">
+
+    <div class="profile-avatar" id="profileAvatar">
+        ?
+    </div>
+
+    <h2 id="profileName">
+        Nie zalogowano
+    </h2>
+
+    <p id="profileBio">
+        Zaloguj się, aby korzystać z profilu.
+    </p>
+
+    <button onclick="login()">
+        Zaloguj / Zarejestruj
+    </button>
+
+    <button onclick="closeProfile()">
+        ← Wróć
+    </button>
+
+</div>
+
+
+<div class="comment-box" id="comments">
+
+    <input id="commentInput"
+           placeholder="Napisz komentarz...">
+
+    <button onclick="addComment()">
+        Wyślij
+    </button>
+
+</div>
+
+
+<script>
+
+let currentUser =
+    localStorage.getItem("shorttok_user");
+
+
+function like(button) {
+
+    button.classList.toggle("liked");
+
+    if(button.classList.contains("liked")) {
+        button.querySelector("span").textContent = "♥";
+    }
+
+}
+
+
+function save(button) {
+
+    button.classList.toggle("liked");
+
+    if(button.classList.contains("liked")) {
+        alert("🔖 Film zapisany!");
+    } else {
+        alert("Film usunięty z zapisanych.");
+    }
+
+}
+
+
+function share() {
+
+    if(navigator.share) {
+
+        navigator.share({
+            title: "ShortTok",
+            text: "Zobacz ten film!"
+        });
+
+    } else {
+
+        navigator.clipboard.writeText(location.href);
+        alert("Link skopiowany!");
+
+    }
+
+}
+
+
+function comments() {
+
+    document.getElementById("comments").style.display = "block";
+
+}
+
+
+function addComment() {
+
+    let input =
+        document.getElementById("commentInput");
+
+    if(input.value.trim() !== "") {
+
+        alert(
+            "💬 Dodano komentarz: " +
+            input.value
+        );
+
+        input.value = "";
+
+    }
+
+}
+
+
+function login() {
+
+    document.getElementById("loginModal")
+        .style.display = "flex";
+
+}
+
+
+function closeLogin() {
+
+    document.getElementById("loginModal")
+        .style.display = "none";
+
+}
+
+
+function register() {
+
+    let username =
+        document.getElementById("usernameInput").value;
+
+    let password =
+        document.getElementById("passwordInput").value;
+
+    if(username === "" || password === "") {
+
+        alert("Wpisz nazwę i hasło.");
+        return;
+
+    }
+
+    localStorage.setItem(
+        "shorttok_user",
+        username
+    );
+
+    currentUser = username;
+
+    alert("✅ Konto utworzone!");
+
+    closeLogin();
+
+    updateProfile();
+
+}
+
+
+function doLogin() {
+
+    let username =
+        document.getElementById("usernameInput").value;
+
+    let password =
+        document.getElementById("passwordInput").value;
+
+    if(username === "" || password === "") {
+
+        alert("Wpisz nazwę i hasło.");
+        return;
+
+    }
+
+    localStorage.setItem(
+        "shorttok_user",
+        username
+    );
+
+    currentUser = username;
+
+    alert("✅ Zalogowano!");
+
+    closeLogin();
+
+    updateProfile();
+
+}
+
+
+function profile() {
+
+    document.getElementById("profile")
+        .style.display = "block";
+
+    updateProfile();
+
+}
+
+
+function closeProfile() {
+
+    document.getElementById("profile")
+        .style.display = "none";
+
+}
+
+
+function updateProfile() {
+
+    let name =
+        document.getElementById("profileName");
+
+    let bio =
+        document.getElementById("profileBio");
+
+    let avatar =
+        document.getElementById("profileAvatar");
+
+    if(currentUser) {
+
+        name.textContent =
+            "@" + currentUser;
+
+        bio.textContent =
+            "Witaj na moim profilu! 🎮";
+
+        avatar.textContent =
+            currentUser.charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+updateProfile();
+
+</script>
+
+</body>
+</html>
